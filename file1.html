@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flow Free - Mini Version</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #222;
+    }
+    #game {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      grid-template-rows: repeat(5, 60px);
+      gap: 4px;
+    }
+    .cell {
+      width: 60px;
+      height: 60px;
+      background: #333;
+      border-radius: 8px;
+      position: relative;
+      cursor: pointer;
+    }
+    .dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
+    .red { background: red; }
+    .blue { background: blue; }
+    .green { background: green; }
+    .path {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .red-path { background: rgba(255, 0, 0, 0.5); }
+    .blue-path { background: rgba(0, 0, 255, 0.5); }
+    .green-path { background: rgba(0, 255, 0, 0.5); }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+
+  <script>
+    const game = document.getElementById('game');
+    const size = 5;
+
+    // Define start/end points
+    const dots = {
+      red: [{x: 0, y: 0}, {x: 4, y: 4}],
+      blue: [{x: 0, y: 4}, {x: 4, y: 0}],
+      green: [{x: 2, y: 2}, {x: 0, y: 2}]
+    };
+
+    const board = [];
+
+    function createGrid() {
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.dataset.x = x;
+          cell.dataset.y = y;
+
+          for (const color in dots) {
+            for (const d of dots[color]) {
+              if (d.x === x && d.y === y) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot', color);
+                cell.appendChild(dot);
+              }
+            }
+          }
+
+          cell.addEventListener('mousedown', handleMouseDown);
+          cell.addEventListener('mouseenter', handleMouseEnter);
+          cell.addEventListener('mouseup', handleMouseUp);
+
+          game.appendChild(cell);
+          board.push(cell);
+        }
+      }
+    }
+
+    let isDrawing = false;
+    let currentColor = null;
+    let path = [];
+
+    function handleMouseDown(e) {
+      const x = +e.target.dataset.x;
+      const y = +e.target.dataset.y;
+
+      for (const color in dots) {
+        if (dots[color].some(d => d.x === x && d.y === y)) {
+          isDrawing = true;
+          currentColor = color;
+          path = [e.target];
+          e.target.classList.add(`${color}-path`);
+          break;
+        }
+      }
+    }
+
+    function handleMouseEnter(e) {
+      if (!isDrawing || !currentColor) return;
+      if (!path.includes(e.target)) {
+        path.push(e.target);
+        e.target.classList.add(`${currentColor}-path`);
+      }
+    }
+
+    function handleMouseUp(e) {
+      isDrawing = false;
+      currentColor = null;
+    }
+
+    createGrid();
+  </script>
+</body>
+</html>
